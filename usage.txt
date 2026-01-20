@@ -1,0 +1,2 @@
+./cmakebuild2/cli/zli compress psam_h/psam_h02.csv --compressor psam_h.zlc --output psam_h02.zl --trace psam_h02.cbor --force > psam_h02.log 2>&1
+python3 latency_of_func_log.py psam_h02.log > psam_h02_summary.txt
