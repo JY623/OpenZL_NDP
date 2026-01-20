@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <time.h>
 static double ZS2_ZipLexer_finished_time_ms = 0.0;
-static double split_time_ms = 0.0;
 
 typedef enum {
     PytorchModelSuccessor_U8            = 0,
@@ -158,8 +157,6 @@ pytorchModelDynGraph(ZL_Graph* gctx, ZL_Edge* sctxs[], size_t nbIns)
     fprintf(stderr, "[ZS2_ZipLexer_finished] Start: %.4f ms | End: %.4f ms | Accumulated: %.4f ms\n", start_time_ms, end_time_ms, ZS2_ZipLexer_finished_time_ms);
     fprintf(stderr, "nbSegments: %zu\n", nbSegments);
 
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    double split_start_time_ms = (double)start.tv_sec * 1000.0 + (double)start.tv_nsec / 1000000.0;
     // Split the input according to segmentSizes
     ZL_TRY_LET_T(
             ZL_EdgeList,
@@ -167,12 +164,6 @@ pytorchModelDynGraph(ZL_Graph* gctx, ZL_Edge* sctxs[], size_t nbIns)
             ZL_Edge_runSplitNode(sctx, segmentSizes, nbSegments));
     const ZL_GraphIDList graphs = ZL_Graph_getCustomGraphs(gctx);
     ZL_ASSERT_EQ(streams.nbStreams, nbSegments);
-
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    double split_end_time_ms = (double)end.tv_sec * 1000.0 + (double)end.tv_nsec / 1000000.0;
-    current_duration = split_end_time_ms - split_start_time_ms;
-    split_time_ms += current_duration;
-    fprintf(stderr, "[split] Start: %.4f ms | End: %.4f ms | Accumulated: %.4f ms\n", split_start_time_ms, split_end_time_ms, split_time_ms);
 
     // Set the destination for every segment
     for (size_t i = 0; i < streams.nbStreams; ++i) {
