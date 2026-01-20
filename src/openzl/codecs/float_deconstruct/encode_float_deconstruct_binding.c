@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <time.h>
 static double EI_float32_deconstruct_time_ms = 0.0;
+static double EI_bfloat16_deconstruct_time_ms = 0.0;
+static double EI_float16_deconstruct_time_ms = 0.0;
 
 ZL_INLINE_KEYWORD ZL_Report float_deconstruct(
         ZL_Encoder* eictx,
@@ -73,12 +75,11 @@ ZL_INLINE_KEYWORD ZL_Report float_deconstruct(
 ZL_Report
 EI_float32_deconstruct(ZL_Encoder* eictx, const ZL_Input* ins[], size_t nbIns)
 {
-
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
     ZL_ASSERT_EQ(nbIns, 1);
     ZL_ASSERT_NN(ins);
     const ZL_Input* in = ins[0];
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
     ZL_Report EI_float32_deconstruct_report = float_deconstruct(eictx, in, FLTDECON_ElementType_float32);
     clock_gettime(CLOCK_MONOTONIC, &end);
     double start_time_ms = (double)start.tv_sec * 1000.0 + (double)start.tv_nsec / 1000000.0;
@@ -94,17 +95,35 @@ EI_float32_deconstruct(ZL_Encoder* eictx, const ZL_Input* ins[], size_t nbIns)
 ZL_Report
 EI_bfloat16_deconstruct(ZL_Encoder* eictx, const ZL_Input* ins[], size_t nbIns)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
     ZL_ASSERT_EQ(nbIns, 1);
     ZL_ASSERT_NN(ins);
     const ZL_Input* in = ins[0];
-    return float_deconstruct(eictx, in, FLTDECON_ElementType_bfloat16);
+    ZL_Report EI_bfloat16_deconstruct_report = float_deconstruct(eictx, in, FLTDECON_ElementType_bfloat16);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    double start_time_ms = (double)start.tv_sec * 1000.0 + (double)start.tv_nsec / 1000000.0;
+    double end_time_ms = (double)end.tv_sec * 1000.0 + (double)end.tv_nsec / 1000000.0;
+    double current_duration = end_time_ms - start_time_ms;
+    EI_bfloat16_deconstruct_time_ms += current_duration;
+    fprintf(stderr, "[EI_bfloat16_deconstruct] Start: %.4f ms | End: %.4f ms | Accumulated: %.4f ms\n", start_time_ms, end_time_ms, EI_bfloat16_deconstruct_time_ms);
+    return EI_bfloat16_deconstruct_report;
 }
 
 ZL_Report
 EI_float16_deconstruct(ZL_Encoder* eictx, const ZL_Input* ins[], size_t nbIns)
 {
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
     ZL_ASSERT_EQ(nbIns, 1);
     ZL_ASSERT_NN(ins);
     const ZL_Input* in = ins[0];
-    return float_deconstruct(eictx, in, FLTDECON_ElementType_float16);
+    ZL_Report EI_float16_deconstruct_report = float_deconstruct(eictx, in, FLTDECON_ElementType_float16);
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    double start_time_ms = (double)start.tv_sec * 1000.0 + (double)start.tv_nsec / 1000000.0;
+    double end_time_ms = (double)end.tv_sec * 1000.0 + (double)end.tv_nsec / 1000000.0;
+    double current_duration = end_time_ms - start_time_ms;
+    EI_float16_deconstruct_time_ms += current_duration;
+    fprintf(stderr, "[EI_float16_deconstruct] Start: %.4f ms | End: %.4f ms | Accumulated: %.4f ms\n", start_time_ms, end_time_ms, EI_float16_deconstruct_time_ms);
+    return EI_float16_deconstruct_report;
 }
